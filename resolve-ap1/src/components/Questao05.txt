@@ -1,0 +1,121 @@
+# Como o uso de Contextos pode resolver o problema de Props Drilling
+
+O props Drilling acontece sempre que é preciso enviar props atraves de vários níveis de componentes, isso acaba tornando o código mais complexo e ocasionando erros.
+
+O React Context API oferece uma maneira de compartilhar valores entre componentes sem precisar passar explicitamente uma prop através de cada nível da árvore de componentes.
+
+Conclusão: 
+O uso da context API é essencial quando se usa vários níveis de componentes, pois evita a passagem de props desnecessárias, tornando o código mais limpo e fácil de manter.
+Projetos de grande escala se beneficiam muito do uso da context API, pois evita a passagem de props desnecessárias, tornando o código mais limpo e fácil de manter.
+
+## Exemplo
+
+### Sem Context API (com Props Drilling)
+
+```jsx
+// App.js
+import React from 'react';
+import ComponentA from './ComponentA';
+
+const App = () => {
+  const user = { name: 'John Doe', age: 30 };
+
+  return <ComponentA user={user} />;
+};
+
+export default App;
+
+// ComponentA.js
+import React from 'react';
+import ComponentB from './ComponentB';
+
+const ComponentA = ({ user }) => {
+  // Aqui o componente é jogado para o componente de outro nível
+  return <ComponentB user={user} />;
+};
+
+export default ComponentA;
+
+// ComponentB.js
+import React from 'react';
+import ComponentC from './ComponentC';
+
+const ComponentB = ({ user }) => {
+  // Aqui o componente é jogado para o componente de outro nível
+  return <ComponentC user={user} />;
+};
+
+export default ComponentB;
+
+// ComponentC.js
+import React from 'react';
+
+const ComponentC = ({ user }) => {
+  return <div>{user.name}</div>;
+};
+
+export default ComponentC;
+
+
+// UserContext.js
+import React, { createContext, useContext } from 'react';
+
+const UserContext = createContext();
+
+export const UserProvider = ({ children }) => {
+  const user = { name: 'John Doe', age: 30 };
+
+  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+};
+
+export const useUser = () => {
+  return useContext(UserContext);
+};
+
+## USANDO A CONTEXT API
+// App.js
+import React from 'react';
+import { UserProvider } from './UserContext';
+import ComponentA from './ComponentA';
+
+const App = () => {
+  return (
+    <UserProvider>
+      <ComponentA />
+    </UserProvider>
+  );
+};
+
+export default App;
+
+// ComponentA.js
+import React from 'react';
+import ComponentB from './ComponentB';
+
+const ComponentA = () => {
+  return <ComponentB />;
+};
+
+export default ComponentA;
+
+// ComponentB.js
+import React from 'react';
+import ComponentC from './ComponentC';
+
+const ComponentB = () => {
+  return <ComponentC />;
+};
+
+export default ComponentB;
+
+// ComponentC.js
+import React from 'react';
+import { useUser } from './UserContext';
+
+const ComponentC = () => {
+  const user = useUser();
+
+  return <div>{user.name}</div>;
+};
+
+export default ComponentC;
